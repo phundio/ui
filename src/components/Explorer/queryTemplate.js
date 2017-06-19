@@ -29,6 +29,12 @@ hero_id,
 count(1) total,
 sum(case WHEN is_pick IS TRUE THEN 1 ELSE 0 END) picks, 
 sum(case WHEN is_pick IS FALSE THEN 1 ELSE 0 END) bans,
+sum(case WHEN is_pick IS TRUE AND ord < 8 THEN 1 ELSE 0 END) first_pick, 
+sum(case WHEN is_pick IS FALSE AND ord < 8 THEN 1 ELSE 0 END) first_ban,
+sum(case WHEN is_pick IS TRUE AND ord >= 8 AND ord < 16 THEN 1 ELSE 0 END) second_pick, 
+sum(case WHEN is_pick IS FALSE AND ord >= 8 AND ord < 16 THEN 1 ELSE 0 END) second_ban,
+sum(case WHEN is_pick IS TRUE AND ord >= 16 THEN 1 ELSE 0 END) third_pick, 
+sum(case WHEN is_pick IS FALSE AND ord >= 16 THEN 1 ELSE 0 END) third_ban,
 sum(case WHEN radiant = radiant_win THEN 1 ELSE 0 END)::float/count(1) winrate
 FROM picks_bans
 JOIN matches using(match_id)
@@ -52,13 +58,18 @@ ${tier ? `AND leagues.tier = '${tier.value}'` : ''}
 GROUP BY hero_id
 ORDER BY total ${(order && order.value) || 'DESC'}`;
   } else {
+    const groupVal = group ? `${group.value}${group.bucket ? ` / ${group.bucket} * ${group.bucket}` : ''}` : null;
     query = `SELECT
 ${(group) ?
-[`${group.groupKeySelect || group.value} ${group.alias || ''}`,
+[`${group.groupKeySelect || groupVal} ${group.alias || ''}`,
   (select || {}).countValue || '',
   `round(sum(${(select || {}).groupValue || (select || {}).value || 1})::numeric/count(${(select || {}).avgCountValue || 'distinct matches.match_id'}), 2) avg`,
   'count(distinct matches.match_id) count',
   'sum(case when (player_matches.player_slot < 128) = radiant_win then 1 else 0 end)::float/count(1) winrate',
+  `((sum(case when (player_matches.player_slot < 128) = radiant_win then 1 else 0 end)::float/count(1)) 
+  + 1.96 * 1.96 / (2 * count(1)) 
+  - 1.96 * sqrt((((sum(case when (player_matches.player_slot < 128) = radiant_win then 1 else 0 end)::float/count(1)) * (1 - (sum(case when (player_matches.player_slot < 128) = radiant_win then 1 else 0 end)::float/count(1))) + 1.96 * 1.96 / (4 * count(1))) / count(1))))
+  / (1 + 1.96 * 1.96 / count(1)) wr_lower_bound`,
   `sum(${(select || {}).groupValue || (select || {}).value || 1}) sum`,
   `min(${(select || {}).groupValue || (select || {}).value || 1}) min`,
   `max(${(select || {}).groupValue || (select || {}).value || 1}) max`,
@@ -102,7 +113,7 @@ ${region ? `AND matches.cluster IN (${region.value.join(',')})` : ''}
 ${minDate ? `AND matches.start_time >= extract(epoch from timestamp '${new Date(minDate.value).toISOString()}')` : ''}
 ${maxDate ? `AND matches.start_time <= extract(epoch from timestamp '${new Date(maxDate.value).toISOString()}')` : ''}
 ${tier ? `AND leagues.tier = '${tier.value}'` : ''}
-${group ? `GROUP BY ${group.value}` : ''}
+${group ? `GROUP BY ${groupVal}` : ''}
 ${group ? `HAVING count(distinct matches.match_id) >= ${having ? having.value : '1'}` : ''}
 ORDER BY ${
 [`${group ? 'avg' : (select && select.value) || 'matches.match_id'} ${(order && order.value) || (select && select.order) || 'DESC'}`,
