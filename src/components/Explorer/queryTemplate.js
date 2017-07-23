@@ -22,7 +22,15 @@ const queryTemplate = (props) => {
     tier,
     having,
     limit,
+    isTi7Team,
   } = props;
+  // array inputs
+  // group
+  // hero
+  // player
+  // league
+  // team
+  // organization
   let query;
   if (select && select.template === 'picks_bans') {
     query = `SELECT
@@ -44,6 +52,7 @@ JOIN matches using(match_id)
 JOIN match_patch using(match_id)
 JOIN leagues using(leagueid)
 JOIN team_match using(match_id)
+JOIN teams using(team_id)
 WHERE TRUE
 ${select && select.where ? select.where : ''}
 ${organization ? `AND team_id = ${organization.value}` : ''}
@@ -58,6 +67,7 @@ ${region ? `AND matches.cluster IN (${region.value.join(',')})` : ''}
 ${minDate ? `AND matches.start_time >= extract(epoch from timestamp '${new Date(minDate.value).toISOString()}')` : ''}
 ${maxDate ? `AND matches.start_time <= extract(epoch from timestamp '${new Date(maxDate.value).toISOString()}')` : ''}
 ${tier ? `AND leagues.tier = '${tier.value}'` : ''}
+${isTi7Team ? 'AND teams.team_id IN (5, 15, 39, 46, 2163, 350190, 1375614, 1838315, 1883502, 2108395, 2512249, 2581813, 2586976, 2640025, 2672298, 1333179, 3331948, 1846548)' : ''}
 GROUP BY hero_id
 ORDER BY total ${(order && order.value) || 'DESC'}`;
   } else {
@@ -117,6 +127,7 @@ ${region ? `AND matches.cluster IN (${region.value.join(',')})` : ''}
 ${minDate ? `AND matches.start_time >= extract(epoch from timestamp '${new Date(minDate.value).toISOString()}')` : ''}
 ${maxDate ? `AND matches.start_time <= extract(epoch from timestamp '${new Date(maxDate.value).toISOString()}')` : ''}
 ${tier ? `AND leagues.tier = '${tier.value}'` : ''}
+${isTi7Team ? 'AND teams.team_id IN (5, 15, 39, 46, 2163, 350190, 1375614, 1838315, 1883502, 2108395, 2512249, 2581813, 2586976, 2640025, 2672298, 1333179, 3331948, 1846548)' : ''}
 ${group ? `GROUP BY ${groupVal}` : ''}
 ${group ? `HAVING count(distinct matches.match_id) >= ${having ? having.value : '1'}` : ''}
 ORDER BY ${

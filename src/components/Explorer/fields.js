@@ -369,6 +369,10 @@ ${props.player && props.player.value ? '' : 'AND player_matches.account_id < pla
     text: strings.explorer_organization,
     value: 'team_match.team_id',
     key: 'organization',
+  }, {
+    text: strings.explorer_match,
+    value: 'matches.match_id',
+    key: 'match',
   },
   ].concat(singleFields),
   minPatch: patches,
@@ -445,6 +449,7 @@ ${props.player && props.player.value ? '' : 'AND player_matches.account_id < pla
     const laneRoleId = Number(str.substring('lane_role_'.length));
     return { text: strings[str], value: laneRoleId, key: String(laneRoleId) };
   }),
+  isTi7Team: [{ text: 'Yes', value: true, key: 'true' }],
 });
 
 export default fields;
