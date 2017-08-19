@@ -102,7 +102,7 @@ class Table extends React.Component {
     const { sortState, sortField, sortFn, currentPage } = this.state;
     const dataLength = this.props.data.length;
     let data = this.props.data;
-    if (maxRows && maxRows <= data.length) {
+    if (maxRows && maxRows <= dataLength) {
       data = data.slice(0, maxRows);
     }
     if (sortField) {
@@ -213,7 +213,10 @@ class Table extends React.Component {
                 ))}
                 {summable && <MaterialTableRow>
                   {columns.map((column, colIndex) => (<MaterialTableRowColumn key={`${colIndex}_sum`} style={{ color: column.color }}>
-                    {column.sumFn && abbreviateNumber(data.map(row => row[column.field]).reduce(sum, 0))}
+                    {column.sumFn && (column.field !== 'life_state_dead' ?
+                      abbreviateNumber(data.map(row => row[column.field]).reduce(sum, 0))
+                      : column.displayFn(null, column, data.map(row => row[column.field]).reduce(sum, 0))
+                    )}
                   </MaterialTableRowColumn>))}
                 </MaterialTableRow>}
               </MaterialTableBody>
@@ -224,7 +227,7 @@ class Table extends React.Component {
           numPages={Math.ceil(dataLength / pageLength)}
           currentPage={currentPage}
           pageLength={pageLength}
-          length={data.length}
+          length={dataLength}
           nextPage={this.nextPage}
           prevPage={this.prevPage}
           setCurrentPage={this.setCurrentPage}
