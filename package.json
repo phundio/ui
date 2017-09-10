@@ -11,7 +11,8 @@
     "lintnofix": "eslint . --ext .js,.jsx",
     "lint:css": "stylelint 'src/**/*.css'",
     "test": "NODE_PATH=./src NODE_ENV=test mocha --ui bdd --reporter nyan -r test/initializeJsdom.js $(find src -name '*.spec.*')",
-    "test:watch": "npm test -- --watch --watch-extensions jsx,js"
+    "test:watch": "npm test -- --watch --watch-extensions jsx,js",
+    "update:emoticons": "npm r dota2-emoticons && npm i dota2-emoticons && node dev/updateEmoticons.js"
   },
   "greenkeeper": {
     "label": "type: greenkeeper"
@@ -24,6 +25,7 @@
     "abcolor": "^0.5.5",
     "c3": "^0.4.15",
     "classnames": "^2.2.5",
+    "dota2-emoticons": "^1.0.1",
     "dotaconstants": "^5.11.0",
     "fuzzy": "^0.1.3",
     "heatmap.js": "^2.0.5",
@@ -56,9 +58,9 @@
     "wordcloud": "^1.0.6"
   },
   "devDependencies": {
-    "babel-core": "6.25.0",
+    "babel-core": "6.26.0",
     "babel-loader": "^7.1.1",
-    "babel-polyfill": "6.23.0",
+    "babel-polyfill": "6.26.0",
     "babel-preset-es2015": "^6.18.0",
     "babel-preset-react": "^6.16.0",
     "babel-preset-stage-3": "^6.17.0",
@@ -76,6 +78,7 @@
     "eslint-plugin-jsx-a11y": "^5.0.1",
     "eslint-plugin-react": "^7.1.0",
     "file-loader": "^1.0.0",
+    "fs-extra": "^4.0.1",
     "ignore-styles": "^5.0.1",
     "jsdom": "^11.1.0",
     "json-loader": "^0.5.7",
@@ -85,7 +88,7 @@
     "react-hot-loader": "^3.0.0-beta.6",
     "react-perf-tool": "^0.2.1",
     "simple-vdf": "^1.1.0",
-    "sinon": "^2.4.1",
+    "sinon": "^3.2.1",
     "sinon-chai": "^2.12.0",
     "style-loader": "^0.18.2",
     "stylelint": "^8.0.0",
