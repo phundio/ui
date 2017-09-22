@@ -11,6 +11,7 @@ import { IconRadiant, IconDire } from 'components/Icons';
 import heroes from 'dotaconstants/build/heroes.json';
 import items from 'dotaconstants/build/items.json';
 import itemColors from 'dotaconstants/build/item_colors.json';
+import emotes from 'dota2-emoticons/resources/json/charname.json';
 import ReactTooltip from 'react-tooltip';
 import styles from './Match.css';
 
@@ -128,10 +129,10 @@ const formatApproximateTime = (timeSeconds) => {
   if (timeMinutes > 120) {
     const timeHours = parseInt(timeSeconds / (60 * 60), 10);
     return `${strings.advb_over} ${util.format(strings.time_hh, timeHours)}`;
-  } else if (timeMinutes > 60 && timeMinutes <= 75) {
+  } else if (timeMinutes > 60 && timeMinutes <= 120) {
     // If the time is an hour to a quarter after, describe it as "over an hour"
     return `${strings.advb_over} ${strings.time_h}`;
-  } else if (timeMinutes >= 50) {
+  } else if (timeMinutes >= 50 && timeMinutes < 60) {
     // If the time is between 50 and 60 minutes, describe it as "almost an hour"
     return `${strings.advb_almost} ${strings.time_h}`;
   }
@@ -174,6 +175,8 @@ const evaluateSentiment = (event, lastMessage) => {
 
   if (message.split(' ').length > 10) {
     sentiment.push('long');
+  } else if (['XD', ':D', 'LOL'].includes(message.replace('?', '').toUpperCase())) {
+    sentiment.push('laughed');
   } else if (message.toUpperCase() === message && /\w/.test(message)) {
     sentiment.push('shouted');
   } else if (/(\?|!|@|~|#|\$){2,}/.test(message)) {
@@ -184,6 +187,8 @@ const evaluateSentiment = (event, lastMessage) => {
 
   return strings[sentiment.join('_')];
 };
+
+const emoteKeys = Object.keys(emotes);
 
 // Abstract class
 class StoryEvent {
@@ -245,10 +250,22 @@ class ChatMessageEvent extends StoryEvent {
     this.lastMessage = lastMessage;
     this.message = obj.key.trim();
   }
+
   format() {
     return formatTemplate(strings.story_chatmessage, {
       player: PlayerSpan(this.player),
-      message: this.message,
+      message: this.message.split('')
+        .map((char) => {
+          const emote = emotes[emoteKeys[emoteKeys.indexOf(char)]];
+          if (emote) {
+            return React.createElement('img', {
+              alt: emote,
+              src: `/assets/images/dota2/emoticons/${emote}.gif`,
+              className: styles.emote,
+            });
+          }
+          return char;
+        }),
       said_verb: evaluateSentiment(this, this.lastMessage),
     });
   }
